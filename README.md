@@ -20,12 +20,7 @@ Httadmin专属
 
 ```lua
 local Notification = require(path.to.NotificationSystem)
+--使用例子
+local Httadmin = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/Notifica/refs/heads/main/Main.lua"))()
 
---普通通知
-Notification.send("标题", "内容", 5)
-
---带图标通知
-Notification.send("标题", "内容", 4, "rbxassetid://6031071050")
-
---自定义进度条颜色
-Notification.send("标题", "内容", 3, nil, Color3.fromRGB(255, 0, 0))
+Httadmin.send("欢迎", "欢迎", 4, "rbxassetid://6031071050")
