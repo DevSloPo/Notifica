@@ -1,5 +1,5 @@
 --HA TEAM_Httadmin
---httadmin_Notifica.version V1.0.2
+--httadmin_Notifica.version V1.0.3
 --版权所有© 二改必究
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -48,7 +48,6 @@ local CONFIG = {
 local function initializeGui()
     local player = Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
-    
     local gui = playerGui:FindFirstChild(GUI_NAME)
     if not gui then
         gui = Instance.new("ScreenGui")
@@ -79,11 +78,15 @@ local function createProgressAnimation(frame, duration, color)
     progressBar.Position = UDim2.new(0, 0, 1, -CONFIG.PROGRESS_BAR.HEIGHT)
     progressBar.BackgroundTransparency = 1
     progressBar.ClipsDescendants = true
+    progressBar.ZIndex = 2
     progressBar.Parent = frame
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new(1, 0, 1, 0)
+    fill.Position = UDim2.new(0, 0, 0, 0)
+    fill.AnchorPoint = Vector2.new(0, 0)
     fill.BackgroundColor3 = color or CONFIG.PROGRESS_BAR.COLOR
+    fill.ZIndex = 3
     fill.Parent = progressBar
 
     local corner = Instance.new("UICorner")
@@ -101,7 +104,6 @@ function Notification.send(title, message, duration, iconId, progressColor)
     sound.Volume = 10
     sound.Parent = SoundService
     sound:Play()
-    
     sound.Ended:Connect(function()
         sound:Destroy()
     end)
@@ -130,6 +132,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
         icon.BackgroundTransparency = 1
         icon.Image = iconId
         icon.ImageTransparency = 1
+        icon.ZIndex = 2
         icon.Parent = frame
         iconOffset = 40
         TweenService:Create(icon, TweenInfo.new(CONFIG.ANIMATION.DURATION), {ImageTransparency = 0}):Play()
@@ -145,6 +148,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
     titleLabel.TextColor3 = CONFIG.TITLE.COLOR
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.TextTransparency = 1
+    titleLabel.ZIndex = 2
     titleLabel.Parent = frame
 
     local messageLabel = Instance.new("TextLabel")
@@ -159,6 +163,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
     messageLabel.TextXAlignment = Enum.TextXAlignment.Left
     messageLabel.TextYAlignment = Enum.TextYAlignment.Top
     messageLabel.TextTransparency = 1
+    messageLabel.ZIndex = 2
     messageLabel.Parent = frame
 
     local fadeIn = TweenService:Create(frame, TweenInfo.new(CONFIG.ANIMATION.DURATION), {
@@ -184,17 +189,16 @@ function Notification.send(title, message, duration, iconId, progressColor)
         TweenService:Create(titleLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 1}):Play()
         TweenService:Create(messageLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 1}):Play()
         fadeOut:Play()
-
-        fadeOut.Completed:Wait()
-        frame:Destroy()
-
-        for i, v in ipairs(activeNotifications) do
-            if v == notification then
-                table.remove(activeNotifications, i)
-                break
+        fadeOut.Completed:Connect(function()
+            frame:Destroy()
+            for i, v in ipairs(activeNotifications) do
+                if v == notification then
+                    table.remove(activeNotifications, i)
+                    break
+                end
             end
-        end
-        updateNotificationsPosition()
+            updateNotificationsPosition()
+        end)
     end)
 end
 
