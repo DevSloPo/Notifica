@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
 
 local Notification = {}
 local GUI_NAME = "NotificationGui"
@@ -124,6 +125,22 @@ function Notification.send(title, message, duration, iconId, progressColor)
     corner.CornerRadius = UDim.new(0, CONFIG.CORNER_RADIUS)
     corner.Parent = frame
 
+    local stroke = Instance.new("UIStroke")
+    stroke.Thickness = 2
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Parent = frame
+
+    local hue = 0
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if frame and frame.Parent then
+            hue = (hue + 0.01) % 1
+            stroke.Color = Color3.fromHSV(hue, 1, 1)
+        else
+            connection:Disconnect()
+        end
+    end)
+
     local iconOffset = 0
     if iconId then
         local icon = Instance.new("ImageLabel")
@@ -199,6 +216,9 @@ function Notification.send(title, message, duration, iconId, progressColor)
             end
             updateNotificationsPosition()
         end)
+        if connection then
+            connection:Disconnect()
+        end
     end)
 end
 
