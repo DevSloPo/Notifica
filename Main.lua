@@ -1,4 +1,5 @@
 --HA TEAM_Httadmin
+--httadmin_Notifica.version V1.0.1
 --版权所有© 二改必究
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -9,32 +10,32 @@ local GUI_NAME = "NotificationGui"
 local activeNotifications = {}
 
 local CONFIG = {
-    WIDTH = 300,
-    HEIGHT = 90,
-    SPACING = 10,
-    OFFSET = Vector2.new(30, 30),
+    WIDTH = 250,
+    HEIGHT = 75,
+    SPACING = 8,
+    OFFSET = Vector2.new(20, 20),
     BACKGROUND_TRANSPARENCY = 0.5,
-    CORNER_RADIUS = 12,
+    CORNER_RADIUS = 8,
     PROGRESS_BAR = {
-        HEIGHT = 6,
+        HEIGHT = 4,
         COLOR = Color3.fromRGB(0, 255, 0),
-        CORNER_RADIUS = 3
+        CORNER_RADIUS = 2
     },
     TITLE = {
         FONT = Enum.Font.GothamBold,
-        SIZE = 20,
+        SIZE = 18,
         COLOR = Color3.fromRGB(255, 255, 255),
-        OFFSET = 10
+        OFFSET = 8
     },
     MESSAGE = {
         FONT = Enum.Font.Gotham,
-        SIZE = 16,
+        SIZE = 14,
         COLOR = Color3.fromRGB(220, 220, 220),
-        OFFSET = 36
+        OFFSET = 30
     },
     ICON = {
-        SIZE = UDim2.new(0, 32, 0, 32),
-        OFFSET = 10
+        SIZE = UDim2.new(0, 24, 0, 24),
+        OFFSET = 8
     },
     ANIMATION = {
         DURATION = 0.3,
@@ -46,7 +47,7 @@ local CONFIG = {
 local function initializeGui()
     local player = Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
-
+    
     local gui = playerGui:FindFirstChild(GUI_NAME)
     if not gui then
         gui = Instance.new("ScreenGui")
@@ -119,13 +120,13 @@ function Notification.send(title, message, duration, iconId, progressColor)
         icon.Image = iconId
         icon.ImageTransparency = 1
         icon.Parent = frame
-        iconOffset = 50
+        iconOffset = 40
         TweenService:Create(icon, TweenInfo.new(CONFIG.ANIMATION.DURATION), {ImageTransparency = 0}):Play()
     end
 
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -(iconOffset + 10), 0, 28)
-    titleLabel.Position = UDim2.new(0, iconOffset > 0 and 50 or 10, 0, CONFIG.TITLE.OFFSET)
+    titleLabel.Size = UDim2.new(1, -(iconOffset + 8), 0, 24)
+    titleLabel.Position = UDim2.new(0, iconOffset > 0 and 40 or 8, 0, CONFIG.TITLE.OFFSET)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = title or "Notification"
     titleLabel.Font = CONFIG.TITLE.FONT
@@ -136,8 +137,8 @@ function Notification.send(title, message, duration, iconId, progressColor)
     titleLabel.Parent = frame
 
     local messageLabel = Instance.new("TextLabel")
-    messageLabel.Size = UDim2.new(1, -(iconOffset + 10), 1, -40)
-    messageLabel.Position = UDim2.new(0, iconOffset > 0 and 50 or 10, 0, CONFIG.MESSAGE.OFFSET)
+    messageLabel.Size = UDim2.new(1, -(iconOffset + 8), 1, -32)
+    messageLabel.Position = UDim2.new(0, iconOffset > 0 and 40 or 8, 0, CONFIG.MESSAGE.OFFSET)
     messageLabel.BackgroundTransparency = 1
     messageLabel.Text = message or ""
     messageLabel.Font = CONFIG.MESSAGE.FONT
