@@ -1,3 +1,4 @@
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -44,7 +45,7 @@ local CONFIG = {
 local function initializeGui()
     local player = Players.LocalPlayer
     local playerGui = player:WaitForChild("PlayerGui")
-    
+
     local gui = playerGui:FindFirstChild(GUI_NAME)
     if not gui then
         gui = Instance.new("ScreenGui")
@@ -94,7 +95,7 @@ end
 function Notification.send(title, message, duration, iconId, progressColor)
     duration = duration or 4
     local gui = initializeGui()
-    
+
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, CONFIG.WIDTH, 0, CONFIG.HEIGHT)
     frame.Position = UDim2.new(1, -CONFIG.OFFSET.X, 1, -CONFIG.OFFSET.Y)
