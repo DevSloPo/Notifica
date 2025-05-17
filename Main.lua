@@ -1,9 +1,10 @@
 --HA TEAM_Httadmin
---httadmin_Notifica.version V1.0.1
+--httadmin_Notifica.version V1.0.2
 --版权所有© 二改必究
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
 
 local Notification = {}
 local GUI_NAME = "NotificationGui"
@@ -18,7 +19,6 @@ local CONFIG = {
     CORNER_RADIUS = 8,
     PROGRESS_BAR = {
         HEIGHT = 4,
-        COLOR = Color3.fromRGB(0, 255, 0),
         CORNER_RADIUS = 2
     },
     TITLE = {
@@ -72,7 +72,7 @@ local function updateNotificationsPosition()
     end
 end
 
-local function createProgressAnimation(frame, duration, color)
+local function createProgressAnimation(frame, duration)
     local progressBar = Instance.new("Frame")
     progressBar.Size = UDim2.new(1, 0, 0, CONFIG.PROGRESS_BAR.HEIGHT)
     progressBar.Position = UDim2.new(0, 0, 1, -CONFIG.PROGRESS_BAR.HEIGHT)
@@ -82,19 +82,51 @@ local function createProgressAnimation(frame, duration, color)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new(1, 0, 1, 0)
-    fill.BackgroundColor3 = color or CONFIG.PROGRESS_BAR.COLOR
+    fill.BackgroundTransparency = 1
     fill.Parent = progressBar
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, CONFIG.PROGRESS_BAR.CORNER_RADIUS)
     corner.Parent = fill
 
-    TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 165, 0)),
+        ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 255, 0)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)),
+        ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+        ColorSequenceKeypoint.new(0.83, Color3.fromRGB(75, 0, 130)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(238, 130, 238))
+    })
+    gradient.Rotation = 0
+    gradient.StartPoint = Vector2.new(-0.5, 0)
+    gradient.EndPoint = Vector2.new(0.5, 0)
+    gradient.Parent = fill
+
+    local sizeTween = TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
         Size = UDim2.new(0, 0, 1, 0)
-    }):Play()
+    })
+    sizeTween:Play()
+
+    local gradientTween = TweenService:Create(gradient, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+        StartPoint = Vector2.new(0.5, 0),
+        EndPoint = Vector2.new(1.5, 0)
+    })
+    gradientTween:Play()
 end
 
-function Notification.send(title, message, duration, iconId, progressColor)
+function Notification.send(title, message, duration, iconId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://4590657391"
+    sound.Volume = 10
+    sound.Parent = SoundService
+    sound:Play()
+    
+    sound.Ended:Connect(function()
+        sound:Destroy()
+    end)
+
     duration = duration or 4
     local gui = initializeGui()
 
@@ -157,7 +189,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
     TweenService:Create(messageLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 0}):Play()
     fadeIn:Play()
 
-    createProgressAnimation(frame, duration, progressColor)
+    createProgressAnimation(frame, duration)
 
     local notification = {
         frame = frame,
