@@ -55,6 +55,8 @@ local function initializeGui()
         gui.Name = GUI_NAME
         gui.IgnoreGuiInset = true
         gui.ResetOnSpawn = false
+        gui.DisplayOrder = 1000 -- 确保在顶层
+        gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         gui.Parent = playerGui
     end
     return gui
@@ -73,21 +75,21 @@ local function updateNotificationsPosition()
     end
 end
 
-local function createProgressAnimation(frame, duration, color)
+local function createProgressAnimation(frame, duration)
     local progressBar = Instance.new("Frame")
     progressBar.Size = UDim2.new(1, 0, 0, CONFIG.PROGRESS_BAR.HEIGHT)
     progressBar.Position = UDim2.new(0, 0, 1, -CONFIG.PROGRESS_BAR.HEIGHT)
     progressBar.BackgroundTransparency = 1
     progressBar.ClipsDescendants = true
-    progressBar.ZIndex = 2
+    progressBar.ZIndex = 11
     progressBar.Parent = frame
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new(1, 0, 1, 0)
     fill.Position = UDim2.new(0, 0, 0, 0)
     fill.AnchorPoint = Vector2.new(0, 0)
-    fill.BackgroundColor3 = color or CONFIG.PROGRESS_BAR.COLOR
-    fill.ZIndex = 3
+    fill.BackgroundColor3 = Color3.new(1, 0, 0)
+    fill.ZIndex = 12
     fill.Parent = progressBar
 
     local corner = Instance.new("UICorner")
@@ -97,9 +99,22 @@ local function createProgressAnimation(frame, duration, color)
     TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
         Size = UDim2.new(0, 0, 1, 0)
     }):Play()
+
+    local hue = 0
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if fill and fill.Parent then
+            hue = (hue + 0.01) % 1
+            fill.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+        else
+            connection:Disconnect()
+        end
+    end)
+
+    return connection
 end
 
-function Notification.send(title, message, duration, iconId, progressColor)
+function Notification.send(title, message, duration, iconId)
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://4590657391"
     sound.Volume = 10
@@ -119,6 +134,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
     frame.BackgroundColor3 = Color3.new(0, 0, 0)
     frame.BackgroundTransparency = CONFIG.BACKGROUND_TRANSPARENCY
     frame.BorderSizePixel = 0
+    frame.ZIndex = 10
     frame.Parent = gui
 
     local corner = Instance.new("UICorner")
@@ -131,13 +147,13 @@ function Notification.send(title, message, duration, iconId, progressColor)
     stroke.Parent = frame
 
     local hue = 0
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
+    local borderConnection
+    borderConnection = RunService.RenderStepped:Connect(function()
         if frame and frame.Parent then
             hue = (hue + 0.01) % 1
             stroke.Color = Color3.fromHSV(hue, 1, 1)
         else
-            connection:Disconnect()
+            borderConnection:Disconnect()
         end
     end)
 
@@ -149,7 +165,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
         icon.BackgroundTransparency = 1
         icon.Image = iconId
         icon.ImageTransparency = 1
-        icon.ZIndex = 2
+        icon.ZIndex = 11
         icon.Parent = frame
         iconOffset = 40
         TweenService:Create(icon, TweenInfo.new(CONFIG.ANIMATION.DURATION), {ImageTransparency = 0}):Play()
@@ -165,7 +181,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
     titleLabel.TextColor3 = CONFIG.TITLE.COLOR
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.TextTransparency = 1
-    titleLabel.ZIndex = 2
+    titleLabel.ZIndex = 11
     titleLabel.Parent = frame
 
     local messageLabel = Instance.new("TextLabel")
@@ -180,17 +196,13 @@ function Notification.send(title, message, duration, iconId, progressColor)
     messageLabel.TextXAlignment = Enum.TextXAlignment.Left
     messageLabel.TextYAlignment = Enum.TextYAlignment.Top
     messageLabel.TextTransparency = 1
-    messageLabel.ZIndex = 2
+    messageLabel.ZIndex = 11
     messageLabel.Parent = frame
 
-    local fadeIn = TweenService:Create(frame, TweenInfo.new(CONFIG.ANIMATION.DURATION), {
-        BackgroundTransparency = CONFIG.BACKGROUND_TRANSPARENCY
-    })
     TweenService:Create(titleLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 0}):Play()
     TweenService:Create(messageLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 0}):Play()
-    fadeIn:Play()
 
-    createProgressAnimation(frame, duration, progressColor)
+    local progressConnection = createProgressAnimation(frame, duration)
 
     local notification = {
         frame = frame,
@@ -206,6 +218,7 @@ function Notification.send(title, message, duration, iconId, progressColor)
         TweenService:Create(titleLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 1}):Play()
         TweenService:Create(messageLabel, TweenInfo.new(CONFIG.ANIMATION.DURATION), {TextTransparency = 1}):Play()
         fadeOut:Play()
+
         fadeOut.Completed:Connect(function()
             frame:Destroy()
             for i, v in ipairs(activeNotifications) do
@@ -216,9 +229,9 @@ function Notification.send(title, message, duration, iconId, progressColor)
             end
             updateNotificationsPosition()
         end)
-        if connection then
-            connection:Disconnect()
-        end
+
+        if borderConnection then borderConnection:Disconnect() end
+        if progressConnection then progressConnection:Disconnect() end
     end)
 end
 
