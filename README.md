@@ -19,8 +19,7 @@ Httadmin专属
 ## 使用方法
 
 ```lua
-local Notification = require(path.to.NotificationSystem)
 --使用例子
-local Httadmin = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/Notifica/refs/heads/main/Main.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSloPo/Notifica/refs/heads/main/Main.lua"))()
 
 Httadmin.send("欢迎", "欢迎", 4, "rbxassetid://6031071050")
