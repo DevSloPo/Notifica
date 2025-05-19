@@ -7,7 +7,7 @@ local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 
-local Notification = {}
+Httadmin = {}
 local GUI_NAME = "NotificationGui"
 local activeNotifications = {}
 
@@ -114,7 +114,7 @@ local function createProgressAnimation(frame, duration)
     return connection
 end
 
-function Notification.send(title, message, duration, iconId)
+function Httadmin.send(title, message, duration, iconId)
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://4590657391"
     sound.Volume = 10
@@ -234,5 +234,3 @@ function Notification.send(title, message, duration, iconId)
         if progressConnection then progressConnection:Disconnect() end
     end)
 end
-
-return Notification
