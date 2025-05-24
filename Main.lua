@@ -21,7 +21,7 @@ local CONFIG = {
     PROGRESS_BAR = {
         HEIGHT = 4,
         COLOR = Color3.fromRGB(0, 255, 0),
-        CORNER_RADIUS = 2
+        CORNER_RADIUS = 1
     },
     TITLE = {
         FONT = Enum.Font.GothamBold,
