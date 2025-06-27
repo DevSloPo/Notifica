@@ -1,6 +1,7 @@
 --HA TEAM_Httadmin
 --httadmin_Notifica.version V1.0.3
 --版权所有© 二改必究
+print('PPQOWIEJEJ')
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
