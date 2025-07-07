@@ -1,6 +1,3 @@
---HA TEAM_Httadmin
---httadmin_Notifica.version V1.0.3
---版权所有© 二改必究
 print('PPQOWIEJEJ')
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -56,7 +53,7 @@ local function initializeGui()
         gui.Name = GUI_NAME
         gui.IgnoreGuiInset = true
         gui.ResetOnSpawn = false
-        gui.DisplayOrder = 1000 -- 确保在顶层
+        gui.DisplayOrder = 1000
         gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         gui.Parent = playerGui
     end
@@ -89,7 +86,7 @@ local function createProgressAnimation(frame, duration)
     fill.Size = UDim2.new(1, 0, 1, 0)
     fill.Position = UDim2.new(0, 0, 0, 0)
     fill.AnchorPoint = Vector2.new(0, 0)
-    fill.BackgroundColor3 = Color3.new(1, 0, 0)
+    fill.BackgroundColor3 = CONFIG.PROGRESS_BAR.COLOR
     fill.ZIndex = 12
     fill.Parent = progressBar
 
@@ -145,18 +142,8 @@ function Httadmin.send(title, message, duration, iconId)
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Color = Color3.fromRGB(0, 255, 0)
     stroke.Parent = frame
-
-    local hue = 0
-    local borderConnection
-    borderConnection = RunService.RenderStepped:Connect(function()
-        if frame and frame.Parent then
-            hue = (hue + 0.01) % 1
-            stroke.Color = Color3.fromHSV(hue, 1, 1)
-        else
-            borderConnection:Disconnect()
-        end
-    end)
 
     local iconOffset = 0
     if iconId then
@@ -231,7 +218,6 @@ function Httadmin.send(title, message, duration, iconId)
             updateNotificationsPosition()
         end)
 
-        if borderConnection then borderConnection:Disconnect() end
         if progressConnection then progressConnection:Disconnect() end
     end)
 end
