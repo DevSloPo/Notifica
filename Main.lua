@@ -1,4 +1,3 @@
-print('PPQOWIEJEJ')
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -43,6 +42,28 @@ local CONFIG = {
         EASING_DIRECTION = Enum.EasingDirection.Out
     }
 }
+
+local blendColors = {
+    Color3.fromRGB(0, 255, 255), 
+    Color3.fromRGB(255, 0, 255), 
+    Color3.fromRGB(255, 105, 180)
+}
+
+local function interpolateColors(colors, t)
+    local count = #colors
+    local segment = math.floor(t * count) % count + 1
+    local nextSegment = (segment % count) + 1
+    local alpha = (t * count) % 1
+
+    local c1 = colors[segment]
+    local c2 = colors[nextSegment]
+
+    return Color3.new(
+        c1.R + (c2.R - c1.R) * alpha,
+        c1.G + (c2.G - c1.G) * alpha,
+        c1.B + (c2.B - c1.B) * alpha
+    )
+end
 
 local function initializeGui()
     local player = Players.LocalPlayer
@@ -98,18 +119,9 @@ local function createProgressAnimation(frame, duration)
         Size = UDim2.new(0, 0, 1, 0)
     }):Play()
 
-    local hue = 0
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if fill and fill.Parent then
-            hue = (hue + 0.01) % 1
-            fill.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-        else
-            connection:Disconnect()
-        end
+    return RunService.RenderStepped:Connect(function()
+        -- 混合颜色不需要渐变这里
     end)
-
-    return connection
 end
 
 function Httadmin.send(title, message, duration, iconId)
@@ -142,8 +154,18 @@ function Httadmin.send(title, message, duration, iconId)
     local stroke = Instance.new("UIStroke")
     stroke.Thickness = 2
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    stroke.Color = Color3.fromRGB(0, 255, 0)
+    stroke.Color = blendColors[1]
     stroke.Parent = frame
+
+    local colorTime = 0
+    local strokeConnection
+    strokeConnection = RunService.RenderStepped:Connect(function(dt)
+        colorTime += dt * 0.3
+        stroke.Color = interpolateColors(blendColors, colorTime % 1)
+        if not frame or not frame.Parent then
+            strokeConnection:Disconnect()
+        end
+    end)
 
     local iconOffset = 0
     if iconId then
@@ -208,6 +230,8 @@ function Httadmin.send(title, message, duration, iconId)
         fadeOut:Play()
 
         fadeOut.Completed:Connect(function()
+            if progressConnection then progressConnection:Disconnect() end
+            if strokeConnection then strokeConnection:Disconnect() end
             frame:Destroy()
             for i, v in ipairs(activeNotifications) do
                 if v == notification then
@@ -217,7 +241,5 @@ function Httadmin.send(title, message, duration, iconId)
             end
             updateNotificationsPosition()
         end)
-
-        if progressConnection then progressConnection:Disconnect() end
     end)
 end
